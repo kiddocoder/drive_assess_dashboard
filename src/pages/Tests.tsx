@@ -3,9 +3,10 @@
 import React from "react"
 import { useEffect, useRef, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Plus, Search, Filter, Edit, Eye, BookOpen, Clock, Users, Award, X, CheckCircle } from "lucide-react"
-import { useFetchAllTests } from "../hooks/apiFeatures/useTests"
+import { Plus, Search, Filter, Edit, Eye, BookOpen, Clock, Users, Award, X, CheckCircle, LoaderCircle, Printer } from "lucide-react"
+import { useFetchAllTests, useAddQuestionsToTest } from "../hooks/apiFeatures/useTests"
 import { useFetchQuestions } from "../hooks/apiFeatures/useQuestions"
+import { useFetchTestQuestions } from "../hooks/apiFeatures/useTests"
 
 // interface Test {
 //   id: string
@@ -30,6 +31,7 @@ const Tests: React.FC = () => {
   const [selectedStatus, setSelectedStatus] = useState("all")
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [addQuestion, setAddQuestion] = useState(false)
+  const [viewTest, setViewTest] = useState(false)
   const [selectedTest, setSelectedTest] = useState({});
 
   const categories = ["all", "Road Signs", "Traffic Rules", "Safety", "Practical Test", "Parking"]
@@ -56,7 +58,9 @@ const Tests: React.FC = () => {
     return matchesSearch && matchesCategory && matchesStatus
   }) || []
 
-  const CreateTestModal = () => (
+  const CreateTestModal = ({
+    test
+  }: any) => (
     <AnimatePresence>
       {showCreateModal && (
         <motion.div
@@ -73,7 +77,7 @@ const Tests: React.FC = () => {
             className="bg-white rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="text-2xl font-bold text-charcoal mb-6">Create New Test</h3>
+            <h3 className="text-2xl font-bold text-charcoal mb-6">{test ? "Edit Test" : "Create New Test"}</h3>
 
             <form className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -128,7 +132,9 @@ const Tests: React.FC = () => {
               <div className="flex justify-end space-x-4">
                 <button
                   type="button"
-                  onClick={() => setShowCreateModal(false)}
+                  onClick={() => {
+                    setShowCreateModal(false)
+                  }}
                   className="px-6 py-3 border border-gray-300 text-charcoal rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   Cancel
@@ -137,7 +143,7 @@ const Tests: React.FC = () => {
                   type="submit"
                   className="px-6 py-3 bg-canadianRed text-white rounded-lg hover:bg-canadianRed/90 transition-colors"
                 >
-                  Create Test
+                  {test ? "Save changes" : "Create Test"}
                 </button>
               </div>
             </form>
@@ -240,7 +246,7 @@ const Tests: React.FC = () => {
                   <div className="flex items-center justify-center mb-1">
                     <BookOpen className="w-4 h-4 text-coolBlue" />
                   </div>
-                  <div className="text-lg font-bold text-charcoal">{test.questions}</div>
+                  <div className="text-lg font-bold text-charcoal">{test?.questions?.length || 0}</div>
                   <div className="text-xs text-grayText">Questions</div>
                 </div>
 
@@ -270,11 +276,20 @@ const Tests: React.FC = () => {
               </div>
 
               <div className="flex items-center space-x-2">
-                <button className="flex-1 bg-coolBlue text-white py-2 px-3 rounded-lg text-sm font-medium hover:bg-coolBlue/90 transition-colors flex items-center justify-center space-x-1">
+                <button
+                  onClick={() => {
+                    setSelectedTest(test);
+                    setViewTest(true)
+                  }}
+                  className="flex-1 bg-coolBlue text-white py-2 px-3 rounded-lg text-sm font-medium hover:bg-coolBlue/90 transition-colors flex items-center justify-center space-x-1">
                   <Eye className="w-4 h-4" />
                   <span>View</span>
                 </button>
-                <button className="flex-1 bg-successGreen text-white py-2 px-3 rounded-lg text-sm font-medium hover:bg-successGreen/90 transition-colors flex items-center justify-center space-x-1">
+                <button
+                  onClick={() => {
+                    setSelectedTest(test);
+                  }}
+                  className="flex-1 bg-successGreen text-white py-2 px-3 rounded-lg text-sm font-medium hover:bg-successGreen/90 transition-colors flex items-center justify-center space-x-1">
                   <Edit className="w-4 h-4" />
                   <span>Edit</span>
                 </button>
@@ -293,12 +308,19 @@ const Tests: React.FC = () => {
         </AnimatePresence>
       </div>
 
-      <CreateTestModal />
-      {<AddQuestionToTest
+      <CreateTestModal test={selectedTest} />
+      <AddQuestionToTest
         isOpened={addQuestion}
         onClose={() => setAddQuestion(false)}
-        test={JSON.stringify(selectedTest)}
-      />}
+        test={selectedTest}
+      />
+
+      <ViewTestDetails
+        isOpened={viewTest}
+        onClose={() => setViewTest(false)}
+        test={selectedTest}
+      />
+
     </div>
   )
 }
@@ -320,6 +342,7 @@ function AddQuestionToTest({
   const [selectedQuestions, setSelectedQuestions] = useState<string[]>([]);
 
   const { data: initialQuestions = {} } = useFetchQuestions();
+  const addQuestionsToTestMutation = useAddQuestionsToTest()
 
   useEffect(() => {
     // Initialize selected questions with test's existing questions when modal opens
@@ -354,10 +377,15 @@ function AddQuestionToTest({
     question.question.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
 
-  const handleSave = () => {
-    // Here you would typically call an API to update the test with the selected questions
-    console.log("Selected questions:", selectedQuestions);
-    onClose();
+  const handleSave = async () => {
+
+    await addQuestionsToTestMutation.mutateAsync({
+      questionIds: selectedQuestions,
+      testId: test._id
+    }, {
+      onSuccess: () => onClose()
+    })
+
   };
 
   return (
@@ -367,7 +395,7 @@ function AddQuestionToTest({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-start justify-center z-50 p-4"
           onClick={onClose}
         >
           <motion.div
@@ -482,4 +510,116 @@ function AddQuestionToTest({
       )}
     </AnimatePresence>
   );
+}
+
+
+function ViewTestDetails({
+  isOpened,
+  onClose,
+  test
+}: {
+  isOpened: boolean,
+  onClose: () => void,
+  test: any
+}) {
+
+
+  const { data: questions = [], isLoading } = useFetchTestQuestions(test._id);
+
+  return (
+    <AnimatePresence>
+      {isOpened && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-start justify-center z-50 p-4"
+          onClick={onClose}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            className="bg-white rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center pb-4">
+              <h3 className="text-2xl font-bold text-charcoal mb-6">{test.title}</h3>
+              <button
+                onClick={onClose}
+                className="p-2 rounded-full bg-gray-200 cursor-pointer text-gray-600"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {isLoading ? (
+              <div className="flex flex-col justify-center items-center h-[80%] max-h-[90%]">
+                <LoaderCircle size={24} className="animate-spin text-coolBlue" />
+              </div>
+            )
+              : <div className="flex flex-col gap-4 mb-6">
+                {questions.map((question: any) => (
+                  <div
+                    key={question._id}
+                    className={`rounded-xl border bg-white border-gray-200
+                     p-6 transition-all duration-300`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3 mb-3">
+                          <div className="flex items-center space-x-2">
+                            <span className="px-2 py-1 bg-gray-100 text-charcoal rounded-full text-xs font-medium">
+                              {question.category?.name || 'Uncategorized'}
+                            </span>
+                          </div>
+                        </div>
+
+                        <h3 className="font-semibold text-charcoal text-lg mb-3">{question.question}</h3>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
+                          {question.options.map((option: any, idx: any) => (
+                            <div
+                              key={idx}
+                              className={`p-2 rounded-lg border ${idx === question.correctAnswer
+                                ? "border-successGreen bg-successGreen/10 text-successGreen"
+                                : "border-gray-200 text-grayText"
+                                }`}
+                            >
+                              <span className="text-sm font-medium">{String.fromCharCode(65 + idx)}.</span> {option}
+                            </div>
+                          ))}
+                        </div>
+
+                        {question.explanation && (
+                          <p className="text-sm text-grayText mb-3">{question.explanation}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            }
+
+
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={onClose}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              {questions.length > 0 && <button
+                onClick={() => { }}
+                className="px-4 cursor-pointer py-2 flex bg-canadianRed text-white rounded-lg hover:bg-canadianRed/90"
+              >
+                <Printer className="mr-2" />Print PDF
+              </button>}
+            </div>
+
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
 }

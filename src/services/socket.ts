@@ -1,10 +1,10 @@
 import { io, type Socket } from "socket.io-client"
 import { BACKEND_URL } from "../config/app"
 
-interface SocketAuth {
-    userId?: string
-    userRole?: string
-}
+// interface SocketAuth {
+//     userId?: string
+//     userRole?: string
+// }
 
 export default class SocketService {
     private static instance: SocketService

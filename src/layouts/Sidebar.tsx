@@ -29,6 +29,7 @@ import {
   // Database,
   // Upload,
   Briefcase,
+  Clock,
 } from "lucide-react"
 import { Link, useLocation } from "react-router-dom"
 
@@ -85,16 +86,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, expand, onClose }) => {
         // {key: "roles", path: "/roles", label: "Roles & Permissions", icon: Settings, badge: null },
       ],
     },
-    // {
-    //  key: "monitoring",
-    //   label: "System Monitoring",
-    //   items: [
-    //     {key: "live-sessions", path: "/live-sessions", label: "Live Sessions", icon: Clock, badge: "24" },
-    //     {key: "system-alerts", path: "/system-alerts", label: "System Alerts", icon: AlertTriangle, badge: "3" },
-    //     {key: "audit-logs", path: "/audit-logs", label: "Audit Logs", icon: Database, badge: null },
-    //     {key: "performance", path: "/performance", label: "Performance", icon: BarChart3, badge: null },
-    //   ],
-    // },
+    {
+      key: "monitoring",
+      label: "System Monitoring",
+      items: [
+        { key: "live-sessions", path: "/live-sessions", label: "Live Sessions", icon: Clock, badge: "24" },
+        // {key: "system-alerts", path: "/system-alerts", label: "System Alerts", icon: AlertTriangle, badge: "3" },
+        // {key: "audit-logs", path: "/audit-logs", label: "Audit Logs", icon: Database, badge: null },
+        // {key: "performance", path: "/performance", label: "Performance", icon: BarChart3, badge: null },
+      ],
+    },
     {
       key: "financial",
       label: "Financial",
