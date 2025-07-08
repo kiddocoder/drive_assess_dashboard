@@ -5,29 +5,26 @@ import { useState } from "react"
 import { motion } from "framer-motion"
 import { Eye, EyeOff, Mail, Lock, Car, Loader2 } from "lucide-react"
 import { useAuth } from "../../contexts/AuthContext"
+import { useNavigate } from "react-router-dom"
 
 const LoginForm: React.FC = () => {
-  const [email, setEmail] = useState("")
+  const [identifier, setIdentifier] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
-  const [error, setError] = useState("")
-  const { login, isLoading } = useAuth()
+  const { login, isLoading, formError } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError("")
-
-    const success = await login(email, password)
-    if (!success) {
-      setError("Invalid email or password")
+    const success = await login(identifier, password);
+    if (success) {
+      navigate("/")
     }
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-canadianRed/10 to-coolBlue/10 flex items-center justify-center p-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+      <div
         className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md border border-gray-200"
       >
         {/* Logo */}
@@ -35,16 +32,22 @@ const LoginForm: React.FC = () => {
           <div className="w-16 h-16 bg-canadianRed rounded-2xl flex items-center justify-center mx-auto mb-4">
             <Car className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-charcoal">DriveReady Admin</h1>
+          <h1 className="text-2xl font-bold text-charcoal">DriveAccess Admin</h1>
           <p className="text-grayText mt-2">Sign in to your dashboard</p>
         </div>
 
         {/* Demo Credentials */}
-        <div className="bg-coolBlue/10 border border-coolBlue/20 rounded-lg p-3 mb-6">
+        {/* <div className="bg-coolBlue/10 border border-coolBlue/20 rounded-lg p-3 mb-6">
           <p className="text-sm text-coolBlue font-medium mb-1">Demo Credentials:</p>
           <p className="text-xs text-coolBlue">Email: admin@driveready.ca</p>
           <p className="text-xs text-coolBlue">Password: admin123</p>
-        </div>
+        </div> */}
+
+        {formError && (
+          <div className="bg-red-50 text-red-500 px-4 p-3 rounded-lg text-sm mb-6 animate-shake">
+            {formError}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Email Field */}
@@ -53,11 +56,11 @@ const LoginForm: React.FC = () => {
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-grayText w-5 h-5" />
               <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="text"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-coolBlue focus:border-transparent transition-all"
-                placeholder="Enter your email"
+                placeholder="Email or phone number"
                 required
               />
             </div>
@@ -86,17 +89,6 @@ const LoginForm: React.FC = () => {
             </div>
           </div>
 
-          {/* Error Message */}
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm"
-            >
-              {error}
-            </motion.div>
-          )}
-
           {/* Submit Button */}
           <motion.button
             type="submit"
@@ -118,9 +110,9 @@ const LoginForm: React.FC = () => {
 
         {/* Footer */}
         <div className="mt-8 text-center">
-          <p className="text-sm text-grayText">© 2024 DriveReady. All rights reserved.</p>
+          <p className="text-sm text-grayText">© {new Date().getFullYear()} DriveAccess. All rights reserved.</p>
         </div>
-      </motion.div>
+      </div>
     </div>
   )
 }

@@ -34,7 +34,7 @@ export default class SocketService {
 
             this.socket = io(BACKEND_URL, {
                 auth: { token },
-                transports: ["websocket", "polling"],
+                transports: ["websocket"],
                 reconnectionAttempts: this.maxReconnectAttempts,
                 reconnectionDelay: 1000,
                 withCredentials: true,
@@ -43,7 +43,7 @@ export default class SocketService {
             this.socket.on("connect", () => {
                 this.connected = true
                 this.reconnectAttempts = 0
-                console.info("🔌 Connected to Socket.IO server")
+               // console.info("🔌 Connected to Socket.IO server")
                 resolve()
             })
 

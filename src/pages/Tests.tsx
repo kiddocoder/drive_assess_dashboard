@@ -1,87 +1,40 @@
 "use client"
 
-import type React from "react"
-import { useState } from "react"
+import React from "react"
+import { useEffect, useRef, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Plus, Search, Filter, Edit, Eye, BookOpen, Clock, Users, Award, MoreVertical, Copy } from "lucide-react"
+import { Plus, Search, Filter, Edit, Eye, BookOpen, Clock, Users, Award, X, CheckCircle } from "lucide-react"
+import { useFetchAllTests } from "../hooks/apiFeatures/useTests"
+import { useFetchQuestions } from "../hooks/apiFeatures/useQuestions"
 
-interface Test {
-  id: string
-  title: string
-  category: string
-  difficulty: "easy" | "medium" | "hard"
-  questions: number
-  duration: number
-  attempts: number
-  passRate: number
-  status: "active" | "draft" | "archived"
-  createdAt: string
-  lastModified: string
-}
+// interface Test {
+//   id: string
+//   title: string
+//   category: string
+//   difficulty: "easy" | "medium" | "hard"
+//   questions: number
+//   duration: number
+//   attempts: number
+//   passRate: number
+//   status: "active" | "draft" | "archived"
+//   createdAt: string
+//   lastModified: string
+// }
 
 const Tests: React.FC = () => {
-  const [tests, setTests] = useState<Test[]>([
-    {
-      id: "1",
-      title: "G1 Knowledge Test - Road Signs",
-      category: "Road Signs",
-      difficulty: "easy",
-      questions: 25,
-      duration: 30,
-      attempts: 1234,
-      passRate: 89.5,
-      status: "active",
-      createdAt: "2024-01-15",
-      lastModified: "2024-01-20",
-    },
-    {
-      id: "2",
-      title: "G2 Road Test Preparation",
-      category: "Practical Test",
-      difficulty: "hard",
-      questions: 40,
-      duration: 45,
-      attempts: 567,
-      passRate: 76.8,
-      status: "active",
-      createdAt: "2024-01-10",
-      lastModified: "2024-01-18",
-    },
-    {
-      id: "3",
-      title: "Defensive Driving Techniques",
-      category: "Safety",
-      difficulty: "medium",
-      questions: 30,
-      duration: 35,
-      attempts: 890,
-      passRate: 92.1,
-      status: "draft",
-      createdAt: "2024-01-08",
-      lastModified: "2024-01-16",
-    },
-  ])
+
+  const { data: tests = {} } = useFetchAllTests();
 
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [selectedStatus, setSelectedStatus] = useState("all")
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [addQuestion, setAddQuestion] = useState(false)
+  const [selectedTest, setSelectedTest] = useState({});
 
   const categories = ["all", "Road Signs", "Traffic Rules", "Safety", "Practical Test", "Parking"]
   const statuses = ["all", "active", "draft", "archived"]
 
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case "easy":
-        return "bg-successGreen text-white"
-      case "medium":
-        return "bg-yellow-500 text-white"
-      case "hard":
-        return "bg-canadianRed text-white"
-      default:
-        return "bg-gray-400 text-white"
-    }
-  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -96,12 +49,12 @@ const Tests: React.FC = () => {
     }
   }
 
-  const filteredTests = tests.filter((test) => {
+  const filteredTests = tests?.data?.filter((test: any) => {
     const matchesSearch = test.title.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesCategory = selectedCategory === "all" || test.category === selectedCategory
     const matchesStatus = selectedStatus === "all" || test.status === selectedStatus
     return matchesSearch && matchesCategory && matchesStatus
-  })
+  }) || []
 
   const CreateTestModal = () => (
     <AnimatePresence>
@@ -260,7 +213,7 @@ const Tests: React.FC = () => {
       {/* Tests Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         <AnimatePresence>
-          {filteredTests.map((test, index) => (
+          {filteredTests.map((test: any, index: number) => (
             <motion.div
               key={test.id}
               initial={{ opacity: 0, y: 20 }}
@@ -275,21 +228,10 @@ const Tests: React.FC = () => {
                   <p className="text-grayText text-sm mb-3">{test.category}</p>
 
                   <div className="flex items-center space-x-2 mb-3">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${getDifficultyColor(test.difficulty)}`}
-                    >
-                      {test.difficulty.charAt(0).toUpperCase() + test.difficulty.slice(1)}
-                    </span>
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(test.status)}`}>
                       {test.status.charAt(0).toUpperCase() + test.status.slice(1)}
                     </span>
                   </div>
-                </div>
-
-                <div className="relative">
-                  <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                    <MoreVertical className="w-4 h-4 text-grayText" />
-                  </button>
                 </div>
               </div>
 
@@ -306,7 +248,7 @@ const Tests: React.FC = () => {
                   <div className="flex items-center justify-center mb-1">
                     <Clock className="w-4 h-4 text-successGreen" />
                   </div>
-                  <div className="text-lg font-bold text-charcoal">{test.duration}m</div>
+                  <div className="text-lg font-bold text-charcoal">{test.timeLimit} (min)</div>
                   <div className="text-xs text-grayText">Duration</div>
                 </div>
 
@@ -336,8 +278,14 @@ const Tests: React.FC = () => {
                   <Edit className="w-4 h-4" />
                   <span>Edit</span>
                 </button>
-                <button className="bg-gray-200 text-charcoal py-2 px-3 rounded-lg text-sm font-medium hover:bg-gray-300 transition-colors">
-                  <Copy className="w-4 h-4" />
+                <button
+                  onClick={() => {
+                    setSelectedTest(test);
+                    setAddQuestion(true)
+                  }}
+                  className="flex items-center gap-2 whitespace-nowrap bg-gray-200 text-charcoal py-2 px-3 rounded-lg text-sm font-medium hover:bg-gray-300 transition-colors">
+                  <BookOpen className="w-4 h-4" />
+                  <span>Add Question</span>
                 </button>
               </div>
             </motion.div>
@@ -346,8 +294,192 @@ const Tests: React.FC = () => {
       </div>
 
       <CreateTestModal />
+      {<AddQuestionToTest
+        isOpened={addQuestion}
+        onClose={() => setAddQuestion(false)}
+        test={JSON.stringify(selectedTest)}
+      />}
     </div>
   )
 }
 
 export default Tests
+
+
+function AddQuestionToTest({
+  isOpened,
+  onClose,
+  test
+}: {
+  isOpened: boolean,
+  onClose: () => void,
+  test: any
+}) {
+  const [searchQuery, setSearchQuery] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [selectedQuestions, setSelectedQuestions] = useState<string[]>([]);
+
+  const { data: initialQuestions = {} } = useFetchQuestions();
+
+  useEffect(() => {
+    // Initialize selected questions with test's existing questions when modal opens
+    if (isOpened) {
+      setSelectedQuestions(test.questions?.map((question: any) => question._id) || []);
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    }
+  }, [isOpened, test.questions]);
+
+  const handleClear = () => {
+    setSearchQuery("");
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  };
+
+  const handleSelectQuestion = (question: any) => {
+    setSelectedQuestions(prev => {
+      if (prev.includes(question._id)) {
+        return prev.filter(id => id !== question._id);
+      } else {
+        return [...prev, question._id];
+      }
+    });
+  };
+
+  const isQuestionSelected = (question: any) => selectedQuestions.includes(question._id);
+
+  const filteredQuestions = initialQuestions?.data?.filter((question: any) =>
+    question.question.toLowerCase().includes(searchQuery.toLowerCase())
+  ) || [];
+
+  const handleSave = () => {
+    // Here you would typically call an API to update the test with the selected questions
+    console.log("Selected questions:", selectedQuestions);
+    onClose();
+  };
+
+  return (
+    <AnimatePresence>
+      {isOpened && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={onClose}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            className="bg-white rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center pb-4">
+              <h3 className="text-2xl font-bold text-charcoal mb-6">Add Questions to Test</h3>
+              <button
+                onClick={onClose}
+                className="p-2 rounded-full bg-gray-200 cursor-pointer text-gray-600"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="relative flex items-center mb-4">
+              <Search className="absolute left-3 text-gray-400" size={20} />
+              <input
+                ref={inputRef}
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search question title ..."
+                className="w-full pl-10 pr-10 py-3 border-1 focus:ring-1 outline-none border-gray-200 focus:ring-blue-500 rounded-lg"
+              />
+              {searchQuery && (
+                <button
+                  onClick={handleClear}
+                  className="absolute right-3 text-gray-400 hover:text-gray-600"
+                >
+                  <X size={20} />
+                </button>
+              )}
+            </div>
+
+            <div className="flex flex-col gap-4 mb-6">
+              {filteredQuestions.map((question: any) => (
+                <div
+                  key={question._id}
+                  onClick={() => handleSelectQuestion(question)}
+                  className={`rounded-xl border ${isQuestionSelected(question)
+                    ? "bg-canadianRed/10 border-canadianRed"
+                    : "bg-white border-gray-200"
+                    } cursor-pointer p-6 transition-all duration-300`}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-3 mb-3">
+                        <div className="flex items-center space-x-2">
+                          <span className="px-2 py-1 bg-gray-100 text-charcoal rounded-full text-xs font-medium">
+                            {question.category?.name || 'Uncategorized'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <h3 className="font-semibold text-charcoal text-lg mb-3">{question.question}</h3>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
+                        {question.options.map((option: any, idx: any) => (
+                          <div
+                            key={idx}
+                            className={`p-2 rounded-lg border ${idx === question.correctAnswer
+                              ? "border-successGreen bg-successGreen/10 text-successGreen"
+                              : "border-gray-200 text-grayText"
+                              }`}
+                          >
+                            <span className="text-sm font-medium">{String.fromCharCode(65 + idx)}.</span> {option}
+                          </div>
+                        ))}
+                      </div>
+
+                      {question.explanation && (
+                        <p className="text-sm text-grayText mb-3">{question.explanation}</p>
+                      )}
+                    </div>
+
+                    <div className="flex items-center space-x-2 ml-4">
+                      <button
+                        className={`p-2 ${isQuestionSelected(question)
+                          ? "text-canadianRed"
+                          : "text-coolBlue"
+                          } hover:bg-successGreen/10 rounded-lg transition-colors`}
+                      >
+                        <CheckCircle className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={onClose}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                className="px-4 py-2 bg-canadianRed text-white rounded-lg hover:bg-canadianRed/90"
+              >
+                Save Changes
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}

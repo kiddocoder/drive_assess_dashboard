@@ -20,6 +20,8 @@ import {
   Download,
   Upload,
 } from "lucide-react"
+import { useFetchAllStudents } from "../hooks/apiFeatures/useUsers"
+import UserForm from "../components/forms/UserForm"
 
 interface Student {
   id: string
@@ -43,68 +45,8 @@ interface Student {
 }
 
 const Students: React.FC = () => {
-  const [students, setStudents] = useState<Student[]>([
-    {
-      id: "1",
-      name: "Ahmed Hassan",
-      email: "ahmed.hassan@email.com",
-      phone: "+1 (416) 555-0123",
-      location: "Toronto, ON",
-      joinDate: "2024-01-15",
-      lastActive: "2 hours ago",
-      subscription: "premium",
-      testsCompleted: 15,
-      averageScore: 94.5,
-      totalSpent: 89.97,
-      status: "active",
-      progress: {
-        roadSigns: 95,
-        trafficRules: 88,
-        safety: 92,
-        parking: 85,
-      },
-    },
-    {
-      id: "2",
-      name: "Maria Rodriguez",
-      email: "maria.rodriguez@email.com",
-      phone: "+1 (604) 555-0456",
-      location: "Vancouver, BC",
-      joinDate: "2024-01-12",
-      lastActive: "1 day ago",
-      subscription: "4-day",
-      testsCompleted: 8,
-      averageScore: 87.2,
-      totalSpent: 19.98,
-      status: "active",
-      progress: {
-        roadSigns: 90,
-        trafficRules: 85,
-        safety: 88,
-        parking: 82,
-      },
-    },
-    {
-      id: "3",
-      name: "Preet Singh",
-      email: "preet.singh@email.com",
-      phone: "+1 (613) 555-0789",
-      location: "Ottawa, ON",
-      joinDate: "2024-01-10",
-      lastActive: "3 hours ago",
-      subscription: "3-day",
-      testsCompleted: 12,
-      averageScore: 91.8,
-      totalSpent: 14.97,
-      status: "active",
-      progress: {
-        roadSigns: 92,
-        trafficRules: 89,
-        safety: 94,
-        parking: 87,
-      },
-    },
-  ])
+
+  const { data: students = {} } = useFetchAllStudents()
 
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
@@ -140,14 +82,14 @@ const Students: React.FC = () => {
     }
   }
 
-  const filteredStudents = students.filter((student) => {
+  const filteredStudents = students?.data?.filter((student: any) => {
     const matchesSearch =
       student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.email.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = statusFilter === "all" || student.status === statusFilter
     const matchesSubscription = subscriptionFilter === "all" || student.subscription === subscriptionFilter
     return matchesSearch && matchesStatus && matchesSubscription
-  })
+  }) || [];
 
   const StudentDetailModal = () => (
     <AnimatePresence>
@@ -208,11 +150,11 @@ const Students: React.FC = () => {
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-sm text-grayText">Status</span>
-                    <span
+                    {/* <span
                       className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(selectedStudent.status)}`}
                     >
                       {selectedStudent.status.charAt(0).toUpperCase() + selectedStudent.status.slice(1)}
-                    </span>
+                    </span> */}
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-grayText">Subscription</span>
@@ -285,104 +227,7 @@ const Students: React.FC = () => {
     </AnimatePresence>
   )
 
-  const AddStudentModal = () => (
-    <AnimatePresence>
-      {showAddModal && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-          onClick={() => setShowAddModal(false)}
-        >
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            className="bg-white rounded-xl p-6 w-full max-w-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 className="text-2xl font-bold text-charcoal mb-6">Add New Student</h3>
 
-            <form className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-charcoal mb-2">Full Name</label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-coolBlue focus:border-transparent"
-                    placeholder="Enter full name"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-charcoal mb-2">Email Address</label>
-                  <input
-                    type="email"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-coolBlue focus:border-transparent"
-                    placeholder="Enter email address"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-charcoal mb-2">Phone Number</label>
-                  <input
-                    type="tel"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-coolBlue focus:border-transparent"
-                    placeholder="Enter phone number"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-charcoal mb-2">Location</label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-coolBlue focus:border-transparent"
-                    placeholder="City, Province"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-charcoal mb-2">Subscription Type</label>
-                  <select className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-coolBlue focus:border-transparent">
-                    <option value="free">Free</option>
-                    <option value="3-day">3-Day Access</option>
-                    <option value="4-day">4-Day Access</option>
-                    <option value="premium">Premium Guide</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-charcoal mb-2">Status</label>
-                  <select className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-coolBlue focus:border-transparent">
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                    <option value="suspended">Suspended</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="flex justify-end space-x-4">
-                <button
-                  type="button"
-                  onClick={() => setShowAddModal(false)}
-                  className="px-6 py-3 border border-gray-300 text-charcoal rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-6 py-3 bg-canadianRed text-white rounded-lg hover:bg-canadianRed/90 transition-colors"
-                >
-                  Add Student
-                </button>
-              </div>
-            </form>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  )
 
   return (
     <div className="p-6 space-y-6">
@@ -459,7 +304,7 @@ const Students: React.FC = () => {
       {/* Students Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         <AnimatePresence>
-          {filteredStudents.map((student, index) => (
+          {filteredStudents.map((student: any, index: any) => (
             <motion.div
               key={student.id}
               initial={{ opacity: 0, y: 20 }}
@@ -473,7 +318,7 @@ const Students: React.FC = () => {
                   <div className="w-12 h-12 bg-coolBlue rounded-full flex items-center justify-center text-white font-bold">
                     {student.name
                       .split(" ")
-                      .map((n) => n[0])
+                      .map((n: any) => n[0])
                       .join("")}
                   </div>
                   <div>
@@ -499,9 +344,9 @@ const Students: React.FC = () => {
                   <span>{student.location}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(student.status)}`}>
+                  {/* <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(student.status)}`}>
                     {student.status.charAt(0).toUpperCase() + student.status.slice(1)}
-                  </span>
+                  </span> */}
                   <span
                     className={`px-2 py-1 rounded-full text-xs font-medium ${getSubscriptionColor(student.subscription)}`}
                   >
@@ -553,7 +398,12 @@ const Students: React.FC = () => {
       </div>
 
       <StudentDetailModal />
-      <AddStudentModal />
+      <UserForm
+        isOpen={showAddModal}
+        action="Student"
+        onClose={() => setShowAddModal(false)}
+        user={null}
+      />
     </div>
   )
 }

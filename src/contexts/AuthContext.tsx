@@ -2,6 +2,7 @@
 
 import type React from "react"
 import { createContext, useContext, useState, useEffect } from "react"
+import { API } from "../config/axios"
 
 interface User {
   id: string
@@ -13,7 +14,8 @@ interface User {
 
 interface AuthContextType {
   user: User | null
-  login: (email: string, password: string) => Promise<boolean>
+  login: (identifier: any, password: string) => Promise<boolean>
+  formError: string | null,
   logout: () => void
   isLoading: boolean
 }
@@ -30,6 +32,7 @@ export const useAuth = () => {
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null)
+  const [formError, setFormError] = useState(null);
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -41,35 +44,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(false)
   }, [])
 
-  const login = async (email: string, password: string): Promise<boolean> => {
-    setIsLoading(true)
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-
-    // Mock authentication - replace with real API
-    if (email === "admin@driveready.ca" && password === "admin123") {
-      const userData = {
-        id: "1",
-        name: "Admin User",
-        email: "admin@driveready.ca",
-        role: "admin" as const,
-      }
-
-      setUser(userData)
-      localStorage.setItem("user", JSON.stringify(userData))
-      setIsLoading(false)
-      return true
+  const login = async (identifier: any, password: string): Promise<boolean> => {
+    setIsLoading(true);
+    try {
+      const response = await API.post('/auth/login', { identifier, password });
+      setUser(response.data.user);
+      localStorage.setItem('user', JSON.stringify(response.data.user))
+      localStorage.setItem('accessToken', JSON.stringify(response.data.token))
+      return true;
+    } catch (error: any) {
+      setFormError(error?.response?.data?.message || error?.response?.data?.errors[0]?.message);
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false)
-    return false
-  }
+    setFormError(null);
+    return false;
+  };
 
   const logout = () => {
     setUser(null)
     localStorage.removeItem("user")
+    localStorage.removeItem('accessToken')
   }
 
-  return <AuthContext.Provider value={{ user, login, logout, isLoading }}>{children}</AuthContext.Provider>
+  return <AuthContext.Provider value={{ user, login, formError, logout, isLoading }}>{children}</AuthContext.Provider>
 }

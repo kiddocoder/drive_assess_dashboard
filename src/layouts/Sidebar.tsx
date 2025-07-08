@@ -5,16 +5,16 @@ import { useState } from "react"
 import {
   LayoutDashboard,
   FileQuestion,
-  BarChart3,
-  Globe,
+  // BarChart3,
+  // Globe,
   Users,
-  Settings,
-  Menu,
+  // Settings,
+  // Menu,
   X,
   Car,
   BookOpen,
   Award,
-  Clock,
+  // Clock,
   FileText,
   Shield,
   UserCheck,
@@ -23,103 +23,102 @@ import {
   HelpCircle,
   ChevronDown,
   ChevronRight,
-  AlertTriangle,
+  // AlertTriangle,
   CheckCircle2,
   Calendar,
-  Database,
-  Download,
-  Upload,
+  // Database,
+  // Upload,
   Briefcase,
 } from "lucide-react"
 import { Link, useLocation } from "react-router-dom"
 
 interface SidebarProps {
   isOpen: boolean
+  expand: () => void
   onClose: () => void
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
-  const [expandedSections, setExpandedSections] = useState<string[]>(["main"])
+const Sidebar: React.FC<SidebarProps> = ({ isOpen, expand, onClose }) => {
+  const [expandedSections, setExpandedSections] = useState<string[]>(["main", "assessments", "users", "settings", "results", "financial"])
   const location = useLocation()
 
   const checkActive = (path: string) => location.pathname === path
 
   const toggleSection = (sectionId: string) => {
     setExpandedSections((prev) =>
-      prev.includes(sectionId) ? prev.filter((id) => id !== sectionId) : [...prev, sectionId],
+      prev.includes(sectionId) ? prev.filter((key) => key !== sectionId) : [...prev, sectionId],
     )
   }
 
   const menuSections = [
     {
-      id: "main",
-      title: "Main",
-      items: [{ id: "dashboard", path: "/", label: "Dashboard", icon: LayoutDashboard, badge: null }],
+      key: "main",
+      label: "Main",
+      items: [{ key: "dashboard", path: "/", label: "Dashboard", icon: LayoutDashboard, badge: null }],
     },
     {
-      id: "assessments",
-      title: "Assessment Management",
+      key: "assessments",
+      label: "Assessment Management",
       items: [
-        { id: "tests", path: "/tests", label: "Test Library", icon: BookOpen, badge: "47" },
-        { id: "questions", path: "/questions", label: "Question Bank", icon: FileQuestion, badge: "1.2k" },
-        { id: "categories", path: "/categories", label: "Test Categories", icon: Briefcase, badge: null },
-        { id: "schedules", path: "/schedules", label: "Test Scheduling", icon: Calendar, badge: "12" },
+        { key: "tests", path: "/tests", label: "Test Library", icon: BookOpen, badge: "47" },
+        { key: "questions", path: "/questions", label: "Question Bank", icon: FileQuestion, badge: "1.2k" },
+        { key: "categories", path: "/categories", label: "Test Categories", icon: Briefcase, badge: null },
+        // {key: "schedules", path: "/schedules", label: "Test Scheduling", icon: Calendar, badge: "12" },
       ],
     },
     {
-      id: "results",
-      title: "Results & Reporting",
+      key: "results",
+      label: "Results & Reporting",
       items: [
-        { id: "results", path: "/results", label: "Test Results", icon: Award, badge: null },
-        { id: "certificates", path: "/certificates", label: "Certificates", icon: CheckCircle2, badge: "89" },
-        { id: "reports", path: "/reports", label: "Custom Reports", icon: FileText, badge: null },
-        { id: "exports", path: "/exports", label: "Data Export", icon: Download, badge: null },
+        { key: "results", path: "/results", label: "Test Results", icon: Award, badge: null },
+        { key: "certificates", path: "/certificates", label: "Certificates", icon: CheckCircle2, badge: "89" },
+        // {key: "reports", path: "/reports", label: "Custom Reports", icon: FileText, badge: null },
       ],
     },
     {
-      id: "users",
-      title: "User Management",
+      key: "users",
+      label: "User Management",
       items: [
-        { id: "students", path: "/students", label: "Test Takers", icon: Users, badge: "8.2k" },
-        { id: "instructors", path: "/instructors", label: "Instructors", icon: UserCheck, badge: "156" },
-        { id: "admins", path: "/admins", label: "Administrators", icon: Shield, badge: "8" },
-        { id: "roles", path: "/roles", label: "Roles & Permissions", icon: Settings, badge: null },
+        { key: "students", path: "/students", label: "Students", icon: Users, badge: "8.2k" },
+        { key: "instructors", path: "/instructors", label: "Instructors", icon: UserCheck, badge: "156" },
+        { key: "admins", path: "/admins", label: "Administrators", icon: Shield, badge: "8" },
+        // {key: "roles", path: "/roles", label: "Roles & Permissions", icon: Settings, badge: null },
       ],
     },
+    // {
+    //  key: "monitoring",
+    //   label: "System Monitoring",
+    //   items: [
+    //     {key: "live-sessions", path: "/live-sessions", label: "Live Sessions", icon: Clock, badge: "24" },
+    //     {key: "system-alerts", path: "/system-alerts", label: "System Alerts", icon: AlertTriangle, badge: "3" },
+    //     {key: "audit-logs", path: "/audit-logs", label: "Audit Logs", icon: Database, badge: null },
+    //     {key: "performance", path: "/performance", label: "Performance", icon: BarChart3, badge: null },
+    //   ],
+    // },
     {
-      id: "monitoring",
-      title: "System Monitoring",
+      key: "financial",
+      label: "Financial",
       items: [
-        { id: "live-sessions", path: "/live-sessions", label: "Live Sessions", icon: Clock, badge: "24" },
-        { id: "system-alerts", path: "/system-alerts", label: "System Alerts", icon: AlertTriangle, badge: "3" },
-        { id: "audit-logs", path: "/audit-logs", label: "Audit Logs", icon: Database, badge: null },
-        { id: "performance", path: "/performance", label: "Performance", icon: BarChart3, badge: null },
+        { key: "payments", path: "/payments", label: "Payments", icon: CreditCard, badge: "New" },
+        { key: "subscriptions", path: "/subscriptions", label: "Subscriptions", icon: Calendar, badge: null },
+        { key: "invoices", path: "/invoices", label: "Invoices", icon: FileText, badge: "45" },
       ],
     },
-    {
-      id: "financial",
-      title: "Financial",
-      items: [
-        { id: "payments", path: "/payments", label: "Payments", icon: CreditCard, badge: "New" },
-        { id: "subscriptions", path: "/subscriptions", label: "Subscriptions", icon: Calendar, badge: null },
-        { id: "invoices", path: "/invoices", label: "Invoices", icon: FileText, badge: "45" },
-      ],
-    },
-    {
-      id: "content",
-      title: "Content Management",
-      items: [
-        { id: "materials", path: "/materials", label: "Study Materials", icon: BookOpen, badge: null },
-        { id: "media", path: "/media", label: "Media Library", icon: Upload, badge: null },
-        { id: "localization", path: "/localization", label: "Localization", icon: Globe, badge: "5" },
-      ],
-    },
+    // {
+    //  key: "content",
+    //   label: "Content Management",
+    //   items: [
+    //     {key: "materials", path: "/materials", label: "Study Materials", icon: BookOpen, badge: null },
+    //     {key: "media", path: "/media", label: "Media Library", icon: Upload, badge: null },
+    //     {key: "localization", path: "/localization", label: "Localization", icon: Globe, badge: "5" },
+    //   ],
+    // },
   ]
 
   const bottomMenuItems = [
-    { id: "notifications", path: "/notifications", label: "Notifications", icon: Bell, badge: "7" },
-    { id: "help", path: "/help", label: "Help & Support", icon: HelpCircle, badge: null },
-    { id: "settings", path: "/settings", label: "Settings", icon: Settings, badge: null },
+    { key: "notifications", path: "/notifications", label: "Notifications", icon: Bell, badge: "7" },
+    { key: "help", path: "/help", label: "Help & Support", icon: HelpCircle, badge: null },
+    // { key: "settings", path: "/settings", label: "Settings", icon: Settings, badge: null },
   ]
 
   return (
@@ -128,29 +127,25 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
       <aside
         className={`fixed left-0 top-0 h-full bg-white shadow-lg z-50 transition-all duration-300 ease-in-out border-r border-gray-200
-          ${isOpen ? "w-64" : "w-24"} 
+          ${isOpen ? "w-64" : "w-18"} 
           ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          {isOpen ? (
+          {isOpen && (
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-canadianRed rounded-lg flex items-center justify-center">
                 <Car className="w-5 h-5 text-white" />
               </div>
-              <h1 className="font-bold text-lg text-charcoal">DriveReady</h1>
-            </div>
-          ) : (
-            <div className="w-8 h-8 bg-canadianRed rounded-lg flex items-center justify-center mx-auto">
-              <Car className="w-5 h-5 text-white" />
+              <h1 className="font-bold text-lg text-charcoal">DriveAccess</h1>
             </div>
           )}
 
           <button
-            onClick={onClose}
+            onClick={!isOpen ? expand : onClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200 hidden lg:block"
           >
-            {isOpen ? <X className="w-5 h-5 text-grayText" /> : <Menu className="w-5 h-5 text-grayText" />}
+            <X className="w-5 h-5 text-grayText" />
           </button>
         </div>
 
@@ -158,17 +153,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         <div className="flex-1 overflow-y-auto h-[calc(100vh-120px)]">
           <nav className="p-2 space-y-1">
             {menuSections.map((section) => {
-              const isExpanded = expandedSections.includes(section.id)
+              const isExpanded = expandedSections.includes(section.key)
 
               return (
-                <div key={section.id} className="mb-2">
+                <div key={section.key} className="mb-2">
                   {/* Section Header */}
                   {isOpen && (
                     <button
-                      onClick={() => toggleSection(section.id)}
+                      onClick={() => toggleSection(section.key)}
                       className="w-full flex items-center justify-between px-3 py-2 text-grayText hover:text-charcoal transition-colors duration-200 group"
                     >
-                      <span className="text-xs font-semibold uppercase tracking-wider">{section.title}</span>
+                      <span className="text-sm font-bold uppercase tracking-wider whitespace-nowrap">- {section.label}</span>
                       <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                         {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                       </div>
@@ -183,11 +178,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
                       return (
                         <Link
-                          key={item.id}
+                          key={item.key}
                           to={item.path}
                           className={`w-full flex items-center justify-between px-3 py-2 rounded-lg transition-all duration-200 group ${isActive
-                              ? "bg-coolBlue/10 text-coolBlue border-l-4 border-coolBlue"
-                              : "text-grayText hover:bg-gray-100 hover:text-charcoal"
+                            ? "bg-coolBlue/10 text-coolBlue border-l-4 border-coolBlue"
+                            : "text-grayText hover:bg-gray-100 hover:text-charcoal"
                             }`}
                           title={!isOpen ? item.label : undefined}
                         >
@@ -201,10 +196,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                           {isOpen && item.badge && (
                             <span
                               className={`px-2 py-0.5 text-xs font-semibold rounded-full ${item.badge === "New"
-                                  ? "bg-successGreen text-white"
-                                  : isActive
-                                    ? "bg-coolBlue text-white"
-                                    : "bg-gray-200 text-grayText"
+                                ? "bg-successGreen text-white"
+                                : isActive
+                                  ? "bg-coolBlue text-white"
+                                  : "bg-gray-200 text-grayText"
                                 }`}
                             >
                               {item.badge}
@@ -228,7 +223,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
             return (
               <Link
-                key={item.id}
+                key={item.key}
                 to={item.path}
                 className={`w-full flex items-center justify-between px-3 py-2 rounded-lg transition-all duration-200 ${isActive ? "bg-coolBlue/10 text-coolBlue" : "text-grayText hover:bg-gray-100 hover:text-charcoal"
                   }`}

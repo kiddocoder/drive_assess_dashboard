@@ -5,8 +5,11 @@ import Settings from "./pages/Settings"
 import "./index.css"
 import AppLayout from "./layouts/AppLayout"
 import { createBrowserRouter, RouterProvider } from "react-router-dom"
+import { QueryClientProvider, QueryClient } from "@tanstack/react-query"
 
 function App() {
+
+  const queryClient = new QueryClient()
 
   const router = createBrowserRouter([
     {
@@ -22,7 +25,9 @@ function App() {
 
   return (
     <>
-      <RouterProvider router={router} />
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
     </>
   )
 }

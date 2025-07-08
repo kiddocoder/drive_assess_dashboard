@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState } from "react"
-import { Bell, Car, Menu, Search, LogOut, User } from "lucide-react"
+import { Bell, Menu, Search, LogOut, User } from "lucide-react"
 import { useAuth } from "../contexts/AuthContext"
 import SearchPopup from "../components/forms/SearchPopup"
 
@@ -39,10 +39,7 @@ const Header: React.FC<HeaderProps> = ({ sidebarOpen, setSidebarOpen }) => {
             </button>
 
             <div className="flex items-center">
-              <div className="w-8 h-8 bg-canadianRed rounded-lg flex items-center justify-center mr-2">
-                <Car className="w-5 h-5 text-white" />
-              </div>
-              <h1 className="text-xl font-bold text-charcoal hidden sm:block">DriveReady</h1>
+              <h1 className="text-xl font-bold text-charcoal hidden sm:block">Dashboard</h1>
             </div>
           </div>
 

@@ -4,7 +4,7 @@ import type React from "react"
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Plus, Search, Edit, Trash2, Eye, Briefcase, BookOpen, Users, Award, MoreVertical } from "lucide-react"
-
+import { useFetchCategories } from "../hooks/apiFeatures/useCategories"
 interface Category {
   id: string
   name: string
@@ -20,81 +20,16 @@ interface Category {
 }
 
 const Categories: React.FC = () => {
-  const [categories, setCategories] = useState<Category[]>([
-    {
-      id: "1",
-      name: "Road Signs & Signals",
-      description: "Learn about traffic signs, signals, and road markings used across Canada",
-      icon: "🚦",
-      color: "bg-canadianRed",
-      testsCount: 12,
-      questionsCount: 245,
-      studentsEnrolled: 3456,
-      averageScore: 89.5,
-      status: "active",
-      createdAt: "2024-01-15",
-    },
-    {
-      id: "2",
-      name: "Traffic Rules & Regulations",
-      description: "Understanding Canadian traffic laws and driving regulations",
-      icon: "📋",
-      color: "bg-coolBlue",
-      testsCount: 8,
-      questionsCount: 189,
-      studentsEnrolled: 2890,
-      averageScore: 85.2,
-      status: "active",
-      createdAt: "2024-01-12",
-    },
-    {
-      id: "3",
-      name: "Defensive Driving",
-      description: "Safe driving techniques and hazard awareness",
-      icon: "🛡️",
-      color: "bg-successGreen",
-      testsCount: 6,
-      questionsCount: 156,
-      studentsEnrolled: 2134,
-      averageScore: 92.1,
-      status: "active",
-      createdAt: "2024-01-10",
-    },
-    {
-      id: "4",
-      name: "Parking & Positioning",
-      description: "Proper parking techniques and vehicle positioning",
-      icon: "🅿️",
-      color: "bg-yellow-500",
-      testsCount: 4,
-      questionsCount: 98,
-      studentsEnrolled: 1567,
-      averageScore: 87.8,
-      status: "active",
-      createdAt: "2024-01-08",
-    },
-    {
-      id: "5",
-      name: "Winter Driving",
-      description: "Special considerations for Canadian winter conditions",
-      icon: "❄️",
-      color: "bg-blue-600",
-      testsCount: 3,
-      questionsCount: 67,
-      studentsEnrolled: 1234,
-      averageScore: 83.4,
-      status: "inactive",
-      createdAt: "2024-01-05",
-    },
-  ])
+
+  const { data: categories = {}, isLoading } = useFetchCategories()
 
   const [searchTerm, setSearchTerm] = useState("")
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
 
-  const filteredCategories = categories.filter((category) =>
+  const filteredCategories = categories?.data?.filter((category) =>
     category.name.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+  ) || []
 
   const CreateCategoryModal = () => (
     <AnimatePresence>
@@ -137,13 +72,10 @@ const Categories: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-charcoal mb-2">Color Theme</label>
-                  <select className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-coolBlue focus:border-transparent">
-                    <option value="bg-canadianRed">Canadian Red</option>
-                    <option value="bg-coolBlue">Cool Blue</option>
-                    <option value="bg-successGreen">Success Green</option>
-                    <option value="bg-yellow-500">Yellow</option>
-                    <option value="bg-purple-500">Purple</option>
-                  </select>
+                  <input
+                    type="color"
+                    className="w-full px-4 h-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-coolBlue focus:border-transparent"
+                  />
                 </div>
 
                 <div>
@@ -234,16 +166,16 @@ const Categories: React.FC = () => {
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center space-x-3">
-                  <div className={`w-12 h-12 ${category.color} rounded-xl flex items-center justify-center text-2xl`}>
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl`}>
                     {category.icon}
                   </div>
                   <div>
                     <h3 className="font-bold text-charcoal text-lg">{category.name}</h3>
                     <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${category.status === "active" ? "bg-successGreen text-white" : "bg-gray-400 text-white"
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${category.isActive ? "bg-successGreen text-white" : "bg-gray-400 text-white"
                         }`}
                     >
-                      {category.status.charAt(0).toUpperCase() + category.status.slice(1)}
+                      {category.isActive ? "Active" : "Inactive"}
                     </span>
                   </div>
                 </div>
@@ -260,7 +192,7 @@ const Categories: React.FC = () => {
                   <div className="flex items-center justify-center mb-1">
                     <BookOpen className="w-4 h-4 text-coolBlue" />
                   </div>
-                  <div className="text-lg font-bold text-charcoal">{category.testsCount}</div>
+                  <div className="text-lg font-bold text-charcoal">{category.testsCount || 0}</div>
                   <div className="text-xs text-grayText">Tests</div>
                 </div>
 
@@ -268,7 +200,7 @@ const Categories: React.FC = () => {
                   <div className="flex items-center justify-center mb-1">
                     <Briefcase className="w-4 h-4 text-successGreen" />
                   </div>
-                  <div className="text-lg font-bold text-charcoal">{category.questionsCount}</div>
+                  <div className="text-lg font-bold text-charcoal">{category.questionsCount || 0}</div>
                   <div className="text-xs text-grayText">Questions</div>
                 </div>
 
@@ -276,7 +208,7 @@ const Categories: React.FC = () => {
                   <div className="flex items-center justify-center mb-1">
                     <Users className="w-4 h-4 text-canadianRed" />
                   </div>
-                  <div className="text-lg font-bold text-charcoal">{category.studentsEnrolled}</div>
+                  <div className="text-lg font-bold text-charcoal">{category.studentsEnrolled || 0}</div>
                   <div className="text-xs text-grayText">Students</div>
                 </div>
 
@@ -284,7 +216,7 @@ const Categories: React.FC = () => {
                   <div className="flex items-center justify-center mb-1">
                     <Award className="w-4 h-4 text-yellow-500" />
                   </div>
-                  <div className="text-lg font-bold text-charcoal">{category.averageScore}%</div>
+                  <div className="text-lg font-bold text-charcoal">{category.averageScore || 0}%</div>
                   <div className="text-xs text-grayText">Avg Score</div>
                 </div>
               </div>
