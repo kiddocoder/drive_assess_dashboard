@@ -37,11 +37,11 @@ const LoginForm: React.FC = () => {
         </div>
 
         {/* Demo Credentials */}
-        {/* <div className="bg-coolBlue/10 border border-coolBlue/20 rounded-lg p-3 mb-6">
+        <div className="bg-coolBlue/10 border border-coolBlue/20 rounded-lg p-3 mb-6">
           <p className="text-sm text-coolBlue font-medium mb-1">Demo Credentials:</p>
-          <p className="text-xs text-coolBlue">Email: admin@driveready.ca</p>
+          <p className="text-xs text-coolBlue">Email: tresorkiddo@gmail.com</p>
           <p className="text-xs text-coolBlue">Password: admin123</p>
-        </div> */}
+        </div>
 
         {formError && (
           <div className="bg-red-50 text-red-500 px-4 p-3 rounded-lg text-sm mb-6 animate-shake">

@@ -1,7 +1,11 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
+import jsVectorMap from 'jsvectormap'
+import 'jsvectormap/dist/jsvectormap.min.css'
+import 'jsvectormap/dist/maps/world.js'
+
 import {
   AreaChart,
   Area,
@@ -44,12 +48,69 @@ import {
   AreaChartIcon,
   InfoIcon as AnalyticsIcon,
 } from "lucide-react"
+import { API } from "../config/axios"
+
+
+interface Marker {
+  name: string;
+  coords: number[];
+}
 
 const Dashboard = () => {
   const [selectedTimeRange, setSelectedTimeRange] = useState("7d")
   const [activeChart, setActiveChart] = useState<"area" | "bar" | "line">("area")
   const [activeMetric, setActiveMetric] = useState<"revenue" | "users" | "tests">("revenue")
   const [selectedProvince, setSelectedProvince] = useState("ON")
+
+  const mapRef = useRef<any>(null);
+  const mapInstance = useRef<any>(null);
+  const [markers] = useState<Marker[]>([
+    { name: 'New York', coords: [40.7128, -74.0060] },
+    { name: 'London', coords: [51.5074, -0.1278] },
+  ]);
+
+  useEffect(() => {
+    const fetchDash = async () => {
+      const res = await API.get("/dashboard/stats");
+      return res.data;
+    }
+    fetchDash();
+  }, [])
+
+  // Initial map setup
+  useEffect(() => {
+
+    if (!mapRef.current) return;
+
+    mapInstance.current = new jsVectorMap({
+      selector: '#map',
+      map: 'world',
+      zoomButtons: true,
+      markers: markers,
+      regionStyle: {
+        initial: {
+          fill: '#e4e4e4',
+        },
+        hover: {
+          fill: '#a0d1fb',
+        },
+      },
+    });
+
+    return () => {
+      mapInstance.current && mapInstance.current.destroy();
+    };
+  }, []);
+
+
+  // Update markers on the map when state changes
+  useEffect(() => {
+    if (mapInstance.current) {
+      mapInstance.current.removeMarkers();
+      mapInstance.current.addMarkers(markers);
+    }
+  }, [markers]);
+
 
   const worldData = {
     regions: [
@@ -472,41 +533,13 @@ const Dashboard = () => {
         <div
           className="bg-white border border-gray-200 rounded-xl p-6"
         >
-          <h3 className="text-xl font-bold text-charcoal mb-6">Interactive World Map</h3>
+          <h3 className="text-xl font-bold text-charcoal mb-6">Users on the Map ({markers.length})</h3>
           <div className="h-96 bg-gradient-to-br from-cool-blue/10 to-success-green/10 rounded-lg flex items-center justify-center relative overflow-hidden">
-            {/* Simplified world map representation */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-6xl opacity-20">🗺️</div>
+
+            <div id="map" ref={mapRef} className="absolute inset-0">
+
             </div>
 
-            {/* Data points */}
-            <div className="absolute top-1/4 left-1/3">
-              <div
-                className="w-4 h-4 bg-canadianRed rounded-full cursor-pointer"
-                title="Canada - 45,123 users"
-              />
-            </div>
-
-            <div className="absolute top-1/3 left-1/4">
-              <div
-                className="w-3 h-3 bg-coolBlue rounded-full cursor-pointer"
-                title="USA - 3,245 users"
-              />
-            </div>
-
-            <div className="absolute top-1/4 right-1/3">
-              <div
-                className="w-2 h-2 bg-successGreen rounded-full cursor-pointer"
-                title="UK - 1,567 users"
-              />
-            </div>
-
-            <div className="absolute bottom-1/4 right-1/4">
-              <div
-                className="w-2 h-2 bg-charcoal rounded-full cursor-pointer"
-                title="Australia - 892 users"
-              />
-            </div>
 
             <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm rounded-lg p-3">
               <div className="text-xs text-gray-text mb-2">Legend</div>
