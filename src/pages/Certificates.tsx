@@ -20,7 +20,7 @@ interface Certificate {
 }
 
 const Certificates: React.FC = () => {
-  const [certificates, setCertificates] = useState<Certificate[]>([
+  const [certificates] = useState<Certificate[]>([
     {
       id: "1",
       studentName: "Ahmed Hassan",

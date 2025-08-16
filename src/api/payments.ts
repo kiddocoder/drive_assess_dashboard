@@ -1,4 +1,4 @@
-const handleWithdraw = async () => {
+export const handleWithdraw = async (withdrawAmount: number) => {
   try {
     const response = await fetch("/api/withdraw", {
       method: "POST",

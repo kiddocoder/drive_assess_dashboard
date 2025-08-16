@@ -10,7 +10,7 @@ import {
   Car,
   BookOpen,
   Award,
-  FileText,
+  // FileText,
   Shield,
   UserCheck,
   // CreditCard,
@@ -19,9 +19,9 @@ import {
   ChevronDown,
   ChevronRight,
   CheckCircle2,
-  Calendar,
+  // Calendar,
   Briefcase,
-  Clock,
+  // Clock,
 } from "lucide-react"
 import { Link, useLocation } from "react-router-dom"
 

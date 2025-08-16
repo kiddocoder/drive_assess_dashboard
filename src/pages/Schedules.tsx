@@ -21,7 +21,7 @@ interface Schedule {
 }
 
 const Schedules: React.FC = () => {
-  const [schedules, setSchedules] = useState<Schedule[]>([
+  const [schedules] = useState<Schedule[]>([
     {
       id: "1",
       title: "G1 Knowledge Test Session",

@@ -38,7 +38,7 @@ interface Instructor {
 }
 
 const Instructors: React.FC = () => {
-  const [instructors, setInstructors] = useState<Instructor[]>([
+  const [instructors] = useState<Instructor[]>([
     {
       id: "1",
       name: "Sarah Johnson",
@@ -257,7 +257,7 @@ const Instructors: React.FC = () => {
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          onClick={() => setShowAddModal(true)}
+          onClick={() => setShowAddModal(() => !showAddModal)}
           className="mt-4 lg:mt-0 bg-canadianRed text-white px-6 py-3 rounded-lg font-semibold flex items-center space-x-2 hover:bg-canadianRed/90 transition-colors"
         >
           <Plus className="w-5 h-5" />

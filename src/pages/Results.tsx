@@ -34,7 +34,7 @@ interface TestResult {
 }
 
 const Results: React.FC = () => {
-  const [results, setResults] = useState<TestResult[]>([
+  const [results] = useState<TestResult[]>([
     {
       id: "1",
       studentName: "Ahmed Hassan",

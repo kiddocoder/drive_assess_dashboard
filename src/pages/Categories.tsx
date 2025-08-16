@@ -17,19 +17,19 @@ interface Category {
   averageScore: number
   status: "active" | "inactive"
   createdAt: string
+  isActive: boolean
 }
 
 const Categories: React.FC = () => {
 
-  const { data: categories = {}, isLoading } = useFetchCategories()
+  const { data: categories = {} } = useFetchCategories()
 
   const [searchTerm, setSearchTerm] = useState("")
   const [showCreateModal, setShowCreateModal] = useState(false)
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
 
-  const filteredCategories = categories?.data?.filter((category) =>
+  const filteredCategories = categories?.data?.filter((category: Category) =>
     category.name.toLowerCase().includes(searchTerm.toLowerCase()),
-  ) || []
+  ) || [];
 
   const CreateCategoryModal = () => (
     <AnimatePresence>
@@ -155,7 +155,7 @@ const Categories: React.FC = () => {
       {/* Categories Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <AnimatePresence>
-          {filteredCategories.map((category, index) => (
+          {filteredCategories.map((category: Category, index: number) => (
             <motion.div
               key={category.id}
               initial={{ opacity: 0, y: 20 }}

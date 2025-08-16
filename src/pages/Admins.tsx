@@ -1,8 +1,8 @@
 import type React from "react"
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Search, Filter, Plus, Edit, Trash2, Eye, Mail, Phone, MapPin, Award } from "lucide-react"
-import { useFetchAllAdmins, useFetchAllUsers } from "../hooks/apiFeatures/useUsers"
+import { Search, Filter, Plus, Edit, Trash2, Eye, Mail, Phone, MapPin } from "lucide-react"
+import { useFetchAllAdmins } from "../hooks/apiFeatures/useUsers"
 
 interface User {
     id: number
@@ -16,123 +16,24 @@ interface User {
     quizzesCompleted: number
     averageScore: number
     lastActive: string
+    lastLogin: string
 }
 
 const AdminManager: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState("")
     const [statusFilter, setStatusFilter] = useState("all")
-    const [subscriptionFilter, setSubscriptionFilter] = useState("all")
     const [showAddModal, setShowAddModal] = useState(false)
 
-    const { data: admins = {}, isLoading, refetch } = useFetchAllAdmins()
+    const { data: admins = {}, } = useFetchAllAdmins()
 
-    console.log("Admins:", admins)
-
-
-    // const admins: User[] = [
-    //     {
-    //         id: 1,
-    //         name: "Ahmed Hassan",
-    //         email: "ahmed.hassan@email.com",
-    //         phone: "+1 (416) 555-0123",
-    //         location: "Toronto, ON",
-    //         joinDate: "2024-01-15",
-    //         status: "active",
-    //         subscription: "premium",
-    //         quizzesCompleted: 15,
-    //         averageScore: 94.5,
-    //         lastActive: "2 hours ago",
-    //     },
-    //     {
-    //         id: 2,
-    //         name: "Maria Rodriguez",
-    //         email: "maria.rodriguez@email.com",
-    //         phone: "+1 (604) 555-0456",
-    //         location: "Vancouver, BC",
-    //         joinDate: "2024-01-12",
-    //         status: "active",
-    //         subscription: "4-day",
-    //         quizzesCompleted: 8,
-    //         averageScore: 87.2,
-    //         lastActive: "1 day ago",
-    //     },
-    //     {
-    //         id: 3,
-    //         name: "Preet Singh",
-    //         email: "preet.singh@email.com",
-    //         phone: "+1 (613) 555-0789",
-    //         location: "Ottawa, ON",
-    //         joinDate: "2024-01-10",
-    //         status: "active",
-    //         subscription: "3-day",
-    //         quizzesCompleted: 12,
-    //         averageScore: 91.8,
-    //         lastActive: "3 hours ago",
-    //     },
-    //     {
-    //         id: 4,
-    //         name: "Jean Dubois",
-    //         email: "jean.dubois@email.com",
-    //         phone: "+1 (514) 555-0321",
-    //         location: "Montreal, QC",
-    //         joinDate: "2024-01-08",
-    //         status: "inactive",
-    //         subscription: "free",
-    //         quizzesCompleted: 3,
-    //         averageScore: 78.5,
-    //         lastActive: "1 week ago",
-    //     },
-    //     {
-    //         id: 5,
-    //         name: "Sarah Johnson",
-    //         email: "sarah.johnson@email.com",
-    //         phone: "+1 (403) 555-0654",
-    //         location: "Calgary, AB",
-    //         joinDate: "2024-01-05",
-    //         status: "suspended",
-    //         subscription: "free",
-    //         quizzesCompleted: 1,
-    //         averageScore: 65.0,
-    //         lastActive: "2 weeks ago",
-    //     },
-    // ]
-
-    // const getStatusColor = (status: string) => {
-    //     switch (status) {
-    //         case "active":
-    //             return "bg-success-green text-white"
-    //         case "inactive":
-    //             return "bg-yellow-500 text-white"
-    //         case "suspended":
-    //             return "bg-canadian-red text-white"
-    //         default:
-    //             return "bg-gray-400 text-white"
-    //     }
-    // }
-
-    // const getSubscriptionColor = (subscription: string) => {
-    //     switch (subscription) {
-    //         case "premium":
-    //             return "bg-canadian-red text-white"
-    //         case "4-day":
-    //             return "bg-cool-blue text-white"
-    //         case "3-day":
-    //             return "bg-success-green text-white"
-    //         case "free":
-    //             return "bg-gray-400 text-white"
-    //         default:
-    //             return "bg-gray-400 text-white"
-    //     }
-    // }
 
     const filteredadmins = admins?.data?.filter((user: User) => {
         const matchesSearch =
             user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             user.email.toLowerCase().includes(searchTerm.toLowerCase())
         const matchesStatus = statusFilter === "all" || user.isActive === true
-        const matchesSubscription = subscriptionFilter === "all" || user.subscription === subscriptionFilter
-        return matchesSearch && matchesStatus && matchesSubscription
-    }) || []
+        return matchesSearch && matchesStatus
+    }) || [] as User[];
 
     return (
         <div className="p-6 space-y-6">
@@ -218,7 +119,7 @@ const AdminManager: React.FC = () => {
                         </thead>
                         <tbody className="divide-y divide-gray-200">
                             <AnimatePresence>
-                                {filteredadmins.map((user, index) => (
+                                {filteredadmins.map((user: User, index: number) => (
                                     <motion.tr
                                         key={user.id}
                                         initial={{ opacity: 0, y: 20 }}

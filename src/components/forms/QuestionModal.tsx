@@ -4,6 +4,23 @@ import { Check, ImageIcon, PlusCircle, Video } from "lucide-react";
 import { useFetchCategories } from "../../hooks/apiFeatures/useCategories"
 import { useCreateQuestion } from "../../hooks/apiFeatures/useQuestions"
 
+interface Category {
+    id: string
+    _id: string
+    name: string
+    description: string
+    icon: string
+    color: string
+    testsCount: number
+    questionsCount: number
+    studentsEnrolled: number
+    averageScore: number
+    status: "active" | "inactive"
+    createdAt: string
+    isActive: boolean
+}
+
+
 interface QuestionFormProps {
     question?: any;
     isOpened: boolean;
@@ -111,7 +128,7 @@ function QuestionForm({ question, isOpened, onClose }: QuestionFormProps) {
                                         }
                                     >
                                         <option value="" selected disabled>--- Select category ---</option>
-                                        {categories.data.map((category) => (
+                                        {categories.data.map((category: Category) => (
                                             <option key={category._id} value={category._id}>
                                                 {category.name}
                                             </option>

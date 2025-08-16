@@ -54,19 +54,6 @@ const Students: React.FC = () => {
   const [showAddModal, setShowAddModal] = useState(false)
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "active":
-        return "bg-successGreen text-white"
-      case "inactive":
-        return "bg-yellow-500 text-white"
-      case "suspended":
-        return "bg-canadianRed text-white"
-      default:
-        return "bg-gray-400 text-white"
-    }
-  }
-
   const getSubscriptionColor = (subscription: string) => {
     switch (subscription) {
       case "premium":

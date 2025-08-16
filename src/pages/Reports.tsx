@@ -32,7 +32,7 @@ interface Report {
 }
 
 const Reports: React.FC = () => {
-  const [reports, setReports] = useState<Report[]>([
+  const [reports] = useState<Report[]>([
     {
       id: "1",
       name: "Weekly Performance Summary",
